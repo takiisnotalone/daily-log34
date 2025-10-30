@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나의 간단 일기 블로그</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #2f3640;
+      margin-top: 20px;
+    }
+
+    .container {
+      background: white;
+      width: 90%;
+      max-width: 600px;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: none;
+    }
+
+    button {
+      background: #40739e;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #2f3640;
+    }
+
+    .entry {
+      background: #f1f2f6;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .entry h3 {
+      margin: 0;
+      color: #2f3640;
+    }
+
+    .entry p {
+      white-space: pre-line;
+      margin-top: 6px;
+      color: #353b48;
+    }
+
+    .entry small {
+      color: #718093;
+      font-size: 12px;
+    }
+
+    .delete-btn {
+      background: #e84118;
+      margin-top: 8px;
+    }
+
+    .delete-btn:hover {
+      background: #c23616;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 나의 간단 일기 블로그</h1>
+
+  <div class="container">
+    <input type="text" id="title" placeholder="제목을 입력하세요">
+    <textarea id="content" placeholder="오늘의 일기를 작성하세요..." rows="6"></textarea>
+    <button onclick="saveEntry()">저장하기</button>
+
+    <hr style="margin: 20px 0;">
+
+    <div id="entries"></div>
+  </div>
+
+  <script>
+    // 저장된 일기를 불러오기
+    window.onload = function() {
+      displayEntries();
+    };
+
+    // 일기 저장
+    function saveEntry() {
+      const title = document.getElementById('title').value.trim();
+      const content = document.getElementById('content').value.trim();
+
+      if (!title || !content) {
+        alert('제목과 내용을 모두 입력해주세요.');
+        return;
+      }
+
+      const entry = {
+        id: Date.now(),
+        title,
+        content,
+        date: new Date().toLocaleString()
+      };
+
+      let entries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+      entries.unshift(entry); // 최신글이 위로
+      localStorage.setItem('diaryEntries', JSON.stringify(entries));
+
+      document.getElementById('title').value = '';
+      document.getElementById('content').value = '';
+
+      displayEntries();
+    }
+
+    // 일기 출력
+    function displayEntries() {
+      const container = document.getElementById('entries');
+      container.innerHTML = '';
+
+      const entries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+
+      if (entries.length === 0) {
+        container.innerHTML = '<p style="color:#888;text-align:center;">작성된 일기가 없습니다.</p>';
+        return;
+      }
+
+      entries.forEach(entry => {
+        const div = document.createElement('div');
+        div.classList.add('entry');
+        div.innerHTML = `
+          <h3>${entry.title}</h3>
+          <small>${entry.date}</small>
+          <p>${entry.content}</p>
+          <button class="delete-btn" onclick="deleteEntry(${entry.id})">삭제</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 일기 삭제
+    function deleteEntry(id) {
+      let entries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+      entries = entries.filter(entry => entry.id !== id);
+      localStorage.setItem('diaryEntries', JSON.stringify(entries));
+      displayEntries();
+    }
+  </script>
+</body>
+</html>
